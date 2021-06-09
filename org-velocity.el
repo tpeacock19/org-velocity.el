@@ -64,6 +64,7 @@
 
 ;;; Code:
 (require 'org)
+(require 'outline)
 (require 'button)
 (require 'electric)
 (require 'dabbrev)
@@ -325,10 +326,14 @@ use it."
 
 (cl-defun org-velocity-goto-entry (heading &key narrow)
   (goto-char (org-velocity-heading-position heading))
+  (ignore-errors (outline-up-heading 1 t))
+  (outline-show-children)
   (save-excursion
     (when narrow
       (org-narrow-to-subtree))
-    (outline-show-all)))
+    (goto-char (org-velocity-heading-position heading))
+    (outline-show-subtree))
+  (goto-char (org-velocity-heading-position heading)))
 
 (defun org-velocity-edit-entry/inline (heading)
   "Edit entry at HEADING in the original buffer."
@@ -352,7 +357,7 @@ use it."
       (setq default-directory dd)       ;Inherit default directory.
       (setq org-velocity-saved-winconf winconf)
       (org-velocity-goto-entry heading :narrow t)
-      (goto-char (point-max))
+      (org-end-of-subtree)
       (add-hook 'org-ctrl-c-ctrl-c-hook 'org-velocity-dismiss nil t))
     (pop-to-buffer buffer)
     (org-velocity-format-header-line
