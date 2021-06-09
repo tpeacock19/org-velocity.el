@@ -565,7 +565,7 @@ Return matches."
 (defun org-velocity-store-link ()
   "Function for `org-store-link-functions'."
   (if org-velocity-search
-      (org-store-link-props
+      (org-link-store-props
        :search org-velocity-search)))
 
 (add-hook 'org-store-link-functions 'org-velocity-store-link)
@@ -772,7 +772,7 @@ displayed."
                         (org-velocity-read-with-completion prompt))
                        (t (read-string prompt)))))
            (remove-hook 'post-command-hook 'org-velocity-update))))
-    (if (bufferp res) (org-pop-to-buffer-same-window res) res)))
+    (if (bufferp res) (pop-to-buffer-same-window res) res)))
 
 (defun org-velocity (arg &optional search)
   "Read a search string SEARCH for Org-Velocity interface.
