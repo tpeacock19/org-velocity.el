@@ -605,12 +605,11 @@ If ASK is non-nil, ask first."
         (:new (unless (org-velocity-create search :ask t)
                 (org-velocity-read nil search)))
         (:force (org-velocity-create search))
-        (:follow (if (y-or-n-p "One match, follow? ")
-                     (progn
-                       (set-buffer (org-velocity-match-buffer))
-                       (goto-char (point-min))
-                       (button-activate (next-button (point))))
-                   (org-velocity-read nil search)))))))
+        (:follow (when (y-or-n-p "One match, follow? ")
+                   (progn
+                     (set-buffer (org-velocity-match-buffer))
+                     (goto-char (point-min))
+                     (button-activate (next-button (point))))))))))
 
 (defun org-velocity-activate-button (char)
   "Go to button on line number associated with CHAR in `org-velocity-index'."
