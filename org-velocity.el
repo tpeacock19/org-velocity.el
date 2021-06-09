@@ -165,27 +165,27 @@ See the documentation for `org-capture-templates'."
 The length of the preview is determined by `window-width'.
 
 Replace all contiguous whitespace with single spaces."
-  (let* ((start (progn
-                  (forward-line 1)
-                  (if (looking-at org-property-start-re)
-                      (re-search-forward org-property-end-re)
-                    (1- (point)))))
-         (string+props (buffer-substring
-                        start
-                        (min
-                         (+ start (window-width))
-                         (point-max)))))
-    ;; We want to preserve the text properties so that, for example,
-    ;; we don't end up with the raw text of links in the preview.
-    (with-temp-buffer
-      (insert string+props)
-      (goto-char (point-min))
-      (save-match-data
-        (while (re-search-forward split-string-default-separators
-                                  (point-max)
-                                  t)
-          (replace-match " ")))
-      (buffer-string))))
+  (ignore-errors ;; I don't know where it errors, but we should probably investigate
+    (save-excursion
+      (let* ((start (save-excursion (org-end-of-meta-data t) (point)))
+             (basic-text (replace-regexp-in-string
+                          "\\s-+"
+                          " "
+                          (buffer-substring-no-properties
+                           start
+                           (min
+                            (+ start (window-width))
+                            (point-max)
+                            (save-excursion
+                              (outline-next-heading)
+                              (point))))))
+             (delinked-text (with-temp-buffer
+                              (insert basic-text)
+                              (goto-char (point-min))
+                              (while (re-search-forward "\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]" nil t)
+                                (replace-match "(link):\\1"))
+                              (buffer-string))))
+        delinked-text))))
 
 (cl-defstruct org-velocity-heading buffer position name level preview)
 
@@ -194,12 +194,12 @@ Replace all contiguous whitespace with single spaces."
 If there is no last heading, return nil."
   (save-excursion
     (goto-char position)
-    (re-search-backward (org-velocity-heading-regexp))
+    (org-back-to-heading 'invisible-ok)
     (let ((components (org-heading-components)))
       (make-org-velocity-heading
        :buffer (current-buffer)
        :position (point)
-       :name (nth 4 components)
+       :name (org-link-display-format (nth 4 components))
        :level (nth 0 components)
        :preview (if org-velocity-show-previews
                     (org-velocity-grab-preview))))))
