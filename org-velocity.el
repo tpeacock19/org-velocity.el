@@ -749,7 +749,7 @@ TEST is a test to run to decide whether to run FN."
 
 (defun org-velocity-read-with-completion (prompt)
   "Completing read with PROMPT."
-  (let ((minibuffer-local-completion-map
+  (let ((minibuffer-mode-map
          org-velocity-local-completion-map)
         (completion-no-auto-exit t)
         (crm-separator " "))
